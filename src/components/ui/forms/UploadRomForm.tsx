@@ -5,10 +5,13 @@ import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, UploadCloud } from "lucide-react";
+import { useAppStore } from "@/lib/store"; // 👈 Zustand store
 
 export default function UploadRomForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const setRom = useAppStore((state) => state.setRom); // 👈 Zustand action
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -17,27 +20,15 @@ export default function UploadRomForm() {
     setError("");
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("rom", file);
-
-    fetch("/api/randomize", {
-      method: "POST",
-      body: formData,
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to process ROM");
-        return res.blob();
+    file
+      .arrayBuffer()
+      .then((buffer) => {
+        const uint8Rom = new Uint8Array(buffer);
+        setRom(uint8Rom); // 👈 Store it globally
       })
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "randomized.gb";
-        a.click();
-      })
-      .catch(() => setError("Something went wrong while randomizing the ROM."))
+      .catch(() => setError("Something went wrong while reading the ROM."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setRom]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -66,7 +57,7 @@ export default function UploadRomForm() {
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Randomizing...
+            Loading...
           </>
         ) : (
           "Browse Files"
