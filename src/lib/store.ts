@@ -11,7 +11,6 @@ export interface RandomizerSettings {
 
 interface AppState {
   romBuffer: Uint8Array | null;
-  
   settings: RandomizerSettings;
   setRom: (buffer: Uint8Array) => void;
   setSettings: (settings: Partial<RandomizerSettings>) => void;
