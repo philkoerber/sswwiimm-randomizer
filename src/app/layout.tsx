@@ -35,13 +35,12 @@ export default function RootLayout({
         {children}
         {/* 👾 MissingNo bottom-right */}
         <div className="fixed bottom-0 right-0 hidden md:block -z-40">
-          <img
+          <Image
             src="/MissingNo.png"
             alt="MissingNo"
             width={64}
             height={64}
             // className="drop-shadow-lg animate-bounce" // optional fun
-            
           />
         </div>
       </body>
