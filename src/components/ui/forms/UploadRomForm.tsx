@@ -5,13 +5,14 @@ import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, UploadCloud } from "lucide-react";
-import { useAppStore } from "@/lib/store"; // 👈 Zustand store
+import { useAppStore } from "@/lib/store"; // Zustand store (for ROM only)
 
 export default function UploadRomForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [filename, setFilename] = useState<string | null>(null); // 👈 store locally
 
-  const setRom = useAppStore((state) => state.setRom); // 👈 Zustand action
+  const setRom = useAppStore((state) => state.setRom); // only store the ROM globally
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -24,7 +25,8 @@ export default function UploadRomForm() {
       .arrayBuffer()
       .then((buffer) => {
         const uint8Rom = new Uint8Array(buffer);
-        setRom(uint8Rom); // 👈 Store it globally
+        setRom(uint8Rom);
+        setFilename(file.name); // 👈 store the name locally
       })
       .catch(() => setError("Something went wrong while reading the ROM."))
       .finally(() => setLoading(false));
@@ -48,7 +50,9 @@ export default function UploadRomForm() {
       <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-primary mb-2" />
 
       <p className="text-center text-sm text-muted-foreground">
-        {isDragActive
+        {filename
+          ? `${filename}`
+          : isDragActive
           ? "Drop your ROM here"
           : "Drag & drop your Pokémon Red ROM, or click to browse"}
       </p>

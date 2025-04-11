@@ -33,8 +33,9 @@ export default function RootLayout({
         className={`${dotGothic16.variable} ${onest.variable} antialiased`}
       >
         <Header />
+        <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
         {children}
-        
+        </div>
         {/* 👾 MissingNo bottom-right */}
         <div className="fixed bottom-0 right-0 hidden md:block -z-40">
           <Image
