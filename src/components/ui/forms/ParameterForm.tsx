@@ -17,7 +17,7 @@ export default function ParameterForm() {
   const setSettings = useAppStore((s) => s.setSettings);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <Label htmlFor="randomizeMoves">Randomize Move Sets</Label>
         <Switch
@@ -36,7 +36,7 @@ export default function ParameterForm() {
         />
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between -mt-2 -mb-2">
         <Label htmlFor="difficulty">Difficulty Level</Label>
         <Select
           value={settings.difficulty}
@@ -54,8 +54,8 @@ export default function ParameterForm() {
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label>Weirdness Level</Label>
+      <div className="flex items-center">
+        <Label className="w-[400px]">Weirdness Level</Label>
         <Slider
           defaultValue={[settings.weirdness]}
           max={5}

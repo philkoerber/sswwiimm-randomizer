@@ -11,14 +11,14 @@ const dotGothic16 = DotGothic16({
 });
 
 const onest = Onest({
-  weight: "400",
+  weight: "300",
   variable: "--font-onest",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: "sswwiimm RANDOMIZER",
-  description: "The weirdest Pokémon Red Randomizers that you have ever seen",
+  description: "The weirdest Pokémon Red Randomizer that you have ever seen",
 };
 
 export default function RootLayout({
@@ -28,11 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      
       <body
         className={`${dotGothic16.variable} ${onest.variable} antialiased`}
       >
         <Header />
         {children}
+        
         {/* 👾 MissingNo bottom-right */}
         <div className="fixed bottom-0 right-0 hidden md:block -z-40">
           <Image

@@ -1,10 +1,11 @@
 import UploadRomForm from "./UploadRomForm";
 import ParameterForm from "./ParameterForm";
 import { Card } from "@/components/ui/card";
+import SubmitButton from "./SubmitButton";
 
 export default function RandomizerForm() {
   return (
-    <Card className="max-w-2xl w-full p-6 mx-auto space-y-10">
+    <Card className="max-w-lg w-full h-fit p-6 mx-auto space-y-10">
       <section>
         <h2 className="text-3xl font-sans mb-8">1. Upload ROM</h2>
         <UploadRomForm />
@@ -15,7 +16,10 @@ export default function RandomizerForm() {
         <ParameterForm />
       </section>
 
-      {/* Submit button can go here later */}
+      <section>
+        <h2 className="text-3xl font-sans mb-8">2. Start the Emulator!</h2>
+        <SubmitButton />
+      </section>
     </Card>
   );
 }
