@@ -5,7 +5,7 @@ import { useAppStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { RocketIcon } from "lucide-react";
 
-export default function SubmitButton() {
+export default function PlayButton() {
   const romBuffer = useAppStore((s) => s.romBuffer);
   const settings = useAppStore((s) => s.settings);
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function SubmitButton() {
     <Button
       onClick={handleClick}
       disabled={!isReady}
-      className="w-full flex items-center justify-center gap-2 text-lg font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+      className="w-full flex items-center justify-center gap-2 text-lg font-medium transition-all"
     >
       <RocketIcon className="h-4 w-4" />
       Play

@@ -11,7 +11,7 @@ export default function PlayPage() {
 
   if (!rom) {
     return (
-      <main className="flex flex-col gap-4 items-center justify-center min-h-screen p-6">
+      <div className="flex flex-col gap-4 items-center justify-center p-6">
         <p className="text-muted-foreground">No ROM loaded.</p>
         <p>
           Please return to the{" "}
@@ -20,13 +20,13 @@ export default function PlayPage() {
           </a>{" "}
           and upload your ROM.
         </p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-6">
+    <div className="flex flex-col items-center justify-center  sm:h-screen sm:w-screen max-w-[1000px] max-h-[900px] border border-stone-200">
       <GameBoyCanvas rom={rom} />
-    </main>
+    </div>
   );
 }

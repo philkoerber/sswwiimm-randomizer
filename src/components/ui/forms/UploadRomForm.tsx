@@ -41,7 +41,7 @@ export default function UploadRomForm() {
   return (
     <Card
       {...getRootProps()}
-      className={`group relative w-full max-w-md mx-auto p-6 flex flex-col items-center justify-center border-2 border-dashed rounded-2xl transition hover:border-primary/70 cursor-pointer ${
+      className={`group relative w-full  mx-auto p-6 flex flex-col items-center justify-center border-2 border-dashed rounded-2xl transition hover:border-primary/70 cursor-pointer ${
         isDragActive ? "border-primary" : "border-muted"
       }`}
     >
@@ -49,13 +49,14 @@ export default function UploadRomForm() {
 
       <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-primary mb-2" />
 
-      <p className="text-center text-sm text-muted-foreground">
+<div className="w-[250px]"><p className="text-center text-sm text-muted-foreground">
         {filename
           ? `${filename}`
           : isDragActive
           ? "Drop your ROM here"
           : "Drag & drop your Pokémon Red ROM, or click to browse"}
-      </p>
+      </p></div>
+      
 
       <Button type="button" className="mt-4" disabled={loading}>
         {loading ? (

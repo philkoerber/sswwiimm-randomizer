@@ -1,7 +1,9 @@
 import UploadRomForm from "./UploadRomForm";
 import ParameterForm from "./ParameterForm";
 import { Card } from "@/components/ui/card";
-import SubmitButton from "./SubmitButton";
+import DownloadButton from "./DownloadButton";
+import PlayButton from "./PlayButton";
+
 
 export default function RandomizerForm() {
   return (
@@ -18,7 +20,9 @@ export default function RandomizerForm() {
 
       <section>
         <h2 className="text-3xl font-sans mb-8">2. Start the Emulator!</h2>
-        <SubmitButton />
+        <PlayButton />
+        <h2 className="text-lg font-mono font-bold mb-1 text-center">or</h2>
+        <DownloadButton />
       </section>
     </Card>
   );
