@@ -1,12 +1,10 @@
 "use client";
 
+import GameBoyCanvas from "@/components/emulator/GameBoyCanvas";
 import { useAppStore } from "@/lib/store";
 import dynamic from "next/dynamic";
 
-// Assuming you have a wrapper like <GameBoyCanvas rom={rom} />
-const GameBoyCanvas = dynamic(() => import("@/components/emulator/GameBoyCanvas"), {
-  ssr: false,
-});
+
 
 export default function PlayPage() {
   const rom = useAppStore((state) => state.romBuffer);

@@ -1,11 +1,27 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/(.*)", // Match all routes
+        headers: [
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+          {
+            key: "Cross-Origin-Embedder-Policy",
+            value: "require-corp",
+          },
+        ],
+      },
+    ];
+  },
   experimental: {
     serverActions: {
-      bodySizeLimit: "2mb" //2mb should be enough, the rom (.gb) i had for testing was just a bit over 1mb
-    }
-  } 
+      bodySizeLimit: "2mb",
+    },
+  },
 };
 
 export default nextConfig;
