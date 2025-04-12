@@ -5,7 +5,7 @@ import { CoffeeIcon } from "lucide-react";
 
 export default function SupportButton() {
   const handleClick = () => {
-    window.open("https://ko-fi.com/yourusername", "_blank");
+    window.open("https://ko-fi.com/sswwiimmtv", "_blank");
   };
 
   return (

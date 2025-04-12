@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Onest, DotGothic16 } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import Image from "next/image";
 
 const dotGothic16 = DotGothic16({
   weight: "400", // required!

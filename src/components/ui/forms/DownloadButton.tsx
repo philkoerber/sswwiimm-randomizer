@@ -3,26 +3,31 @@
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { DownloadIcon } from "lucide-react";
+import { editRom } from "@/lib/editRom"; // 👈 import the reusable patcher
 
 export default function DownloadButton() {
   const romBuffer = useAppStore((s) => s.romBuffer);
+  const settings = useAppStore((s) => s.settings);
 
   const handleDownload = () => {
     if (!romBuffer) return;
 
-    // Create a blob from the romBuffer and generate a URL
-    const blob = new Blob([romBuffer], { type: "application/octet-stream" });
+    // Patch the ROM using current settings
+    const editedRom = editRom(romBuffer, settings);
+
+    // Create a blob from the edited ROM and generate a URL
+    const blob = new Blob([editedRom], { type: "application/octet-stream" });
     const url = window.URL.createObjectURL(blob);
 
-    // Create an anchor element and trigger a download
+    // Trigger a download
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "sswwiimmRandomized.gb"; // Change the file name as desired
+    anchor.download = "sswwiimmRandomized.gb";
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
 
-    // Clean up the URL object
+    // Revoke blob URL
     window.URL.revokeObjectURL(url);
   };
 
