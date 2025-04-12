@@ -2,9 +2,7 @@
 
 import GameBoyCanvas from "@/components/emulator/GameBoyCanvas";
 import { useAppStore } from "@/lib/store";
-import dynamic from "next/dynamic";
-
-
+import Link from "next/link";
 
 export default function PlayPage() {
   const rom = useAppStore((state) => state.romBuffer);
@@ -15,9 +13,9 @@ export default function PlayPage() {
         <p className="text-muted-foreground">No ROM loaded.</p>
         <p>
           Please return to the{" "}
-          <a href="/" className="text-primary underline">
+          <Link href="/" className="text-primary underline">
             main page
-          </a>{" "}
+          </Link>{" "}
           and upload your ROM.
         </p>
       </div>

@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, UploadCloud } from "lucide-react";
+import { FolderOpen, Loader2, UploadCloud } from "lucide-react";
 import { useAppStore } from "@/lib/store"; // Zustand store (for ROM only)
 
 export default function UploadRomForm() {
@@ -49,13 +49,14 @@ export default function UploadRomForm() {
 
       <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-primary mb-2" />
 
-<div className="w-[250px]"><p className="text-center text-sm text-muted-foreground">
+      <div className="w-[250px] h-[80px]"><p className="text-center text-sm text-muted-foreground">
         {filename
           ? `${filename}`
           : isDragActive
           ? "Drop your ROM here"
-          : "Drag & drop your Pokémon Red ROM, or click to browse"}
-      </p></div>
+          : "Drag & drop a Red (Gen1) ROM, or click to browse. Only use legally obtained copies."}
+      </p>
+      </div>
       
 
       <Button type="button" className="mt-4" disabled={loading}>
@@ -64,9 +65,7 @@ export default function UploadRomForm() {
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Loading...
           </>
-        ) : (
-          "Browse Files"
-        )}
+        ) : <><FolderOpen/>Browse files</>}
       </Button>
 
       {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
