@@ -36,16 +36,6 @@ export default function RootLayout({
         <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
         {children}
         </div>
-        {/* 👾 MissingNo bottom-right */}
-        <div className="fixed bottom-0 right-0 hidden md:block -z-40">
-          <Image
-            src="/MissingNo.png"
-            alt="MissingNo"
-            width={64}
-            height={64}
-            // className="drop-shadow-lg animate-bounce" // optional fun
-          />
-        </div>
       </body>
     </html>
   );

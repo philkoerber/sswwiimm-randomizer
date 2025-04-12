@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { RocketIcon } from "lucide-react";
+import { editRom } from "@/lib/editRom"; // import it
 
 export default function PlayButton() {
   const romBuffer = useAppStore((s) => s.romBuffer);
   const settings = useAppStore((s) => s.settings);
+  const setRom = useAppStore((s) => s.setRom); // 👈 update the store
+
   const router = useRouter();
 
   const isReady =
@@ -16,7 +19,10 @@ export default function PlayButton() {
     typeof settings.weirdness === "number";
 
   const handleClick = () => {
-    if (!isReady) return;
+    if (!isReady || !romBuffer) return;
+
+    const editedRom = editRom(romBuffer, settings);
+    setRom(editedRom); // 👈 replace with edited version
     router.push("/play");
   };
 
