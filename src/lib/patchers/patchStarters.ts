@@ -1,7 +1,8 @@
 export function patchStarters(rom: Uint8Array): void {
-    // Based on disassembly, starter Pokémon IDs are stored at 0x2F24
-    rom[0x2F24] = 0x15; // Starter 1 (Bulbasaur -> MissingNo)
-    rom[0x2F25] = 0x15; // Starter 2 (Charmander -> MissingNo)
-    rom[0x2F26] = 0x15; // Starter 3 (Squirtle -> MissingNo)
+  const starterOffsets = [0x46ADD, 0x46F97, 0x494B7, 0x74F9B];
+  for (const offset of starterOffsets) {
+    rom[offset] = 0x15;
+    rom[offset + 1] = 0x15;
+    rom[offset + 2] = 0x15;
   }
-  
+}

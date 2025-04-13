@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { RocketIcon } from "lucide-react";
 import { editRom } from "@/lib/editRom"; // import it
 
+
+
 export default function PlayButton() {
   const romBuffer = useAppStore((s) => s.romBuffer);
   const settings = useAppStore((s) => s.settings);
@@ -14,17 +16,18 @@ export default function PlayButton() {
   const router = useRouter();
 
   const isReady =
-    romBuffer !== null &&
-    settings.difficulty &&
-    typeof settings.weirdness === "number";
+  romBuffer !== null &&
+  settings.difficulty &&
+  typeof settings.weirdness === "number";
 
-  const handleClick = () => {
-    if (!isReady || !romBuffer) return;
+const handleClick = () => {
+  if (!isReady || !romBuffer) return;
 
-    const editedRom = editRom(romBuffer, settings);
-    setRom(editedRom); // 👈 replace with edited version
-    router.push("/play");
-  };
+  const editedRom = editRom(romBuffer, settings);
+
+  setRom(editedRom);
+  router.push("/play");
+};
 
   return (
     <Button
