@@ -63,7 +63,7 @@ const GameBoyCanvas: React.FC<GameBoyCanvasProps> = ({ rom }) => {
 
     // Cleanup: pause the emulator when the component unmounts.
     return () => {
-      WasmBoy.pause().catch((err: any) =>
+      WasmBoy.pause().catch((err: ErrorEvent) =>
         console.error("Error pausing WasmBoy:", err)
       );
     };

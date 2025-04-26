@@ -18,6 +18,7 @@ export function editRom(originalRom: Uint8Array, settings: RandomizerSettings): 
   patchStarters(rom)
 
   console.log(
+    settings,
     "Before:",
     originalRom.slice(0x46ADD, 0x46ADD + 3),
     "After:",
