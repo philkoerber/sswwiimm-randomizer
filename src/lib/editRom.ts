@@ -15,14 +15,24 @@ const isRomModified = (a: Uint8Array, b: Uint8Array): boolean => {
 export function editRom(originalRom: Uint8Array, settings: RandomizerSettings): Uint8Array {
   const rom = new Uint8Array(originalRom); // Clone to avoid mutating the original
 
+  console.log(
+    "Starter patch check:",
+    {
+      Bulbasaur: rom[0x1C2AD],
+      Charmander: rom[0x1C2D7],
+      Squirtle: rom[0x1C301],
+    }
+  );
+
   patchStarters(rom)
 
   console.log(
-    settings,
-    "Before:",
-    originalRom.slice(0x46ADD, 0x46ADD + 3),
-    "After:",
-    rom.slice(0x46ADD, 0x46ADD + 3)
+    "Starter patch check:",
+    {
+      Bulbasaur: rom[0x1C2AD],
+      Charmander: rom[0x1C2D7],
+      Squirtle: rom[0x1C301],
+    }
   );
 
   const isDifferent = isRomModified(rom, originalRom);
@@ -30,7 +40,7 @@ export function editRom(originalRom: Uint8Array, settings: RandomizerSettings): 
     console.error("The ROM was not modified. Are the patch settings correct?");
   }
 
-  console.log("")
+
 
   return rom;
 }
