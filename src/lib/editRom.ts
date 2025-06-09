@@ -2,6 +2,8 @@
 
 import { RandomizerSettings } from "@/lib/store";
 import { patchStarters } from "./patchers/patchStarters";
+import { getROMOffset } from "./utils";
+import { patchTitleMons } from "./patchers/patchTitleMons";
 
 const isRomModified = (a: Uint8Array, b: Uint8Array): boolean => {
   if (a.length !== b.length) return true;
@@ -16,15 +18,13 @@ export function editRom(originalRom: Uint8Array, settings: RandomizerSettings): 
   const rom = new Uint8Array(originalRom); // Clone to avoid mutating the original
 
   console.log(
+    settings,
     "Starter patch check:",
-    {
-      Bulbasaur: rom[0x1C2AD],
-      Charmander: rom[0x1C2D7],
-      Squirtle: rom[0x1C301],
-    }
+    
   );
 
-  patchStarters(rom)
+  // patchStarters(rom)
+  patchTitleMons(rom)
 
   console.log(
     "Starter patch check:",

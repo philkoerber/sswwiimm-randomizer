@@ -53,7 +53,6 @@ const GameBoyCanvas: React.FC<GameBoyCanvasProps> = ({ rom }) => {
         await WasmBoy.loadROM(rom);
         // Begin or resume playing the loaded ROM.
         await WasmBoy.play();
-        console.log("WasmBoy is running!");
       } catch (error) {
         console.error("Error setting up WasmBoy:", error);
       }
