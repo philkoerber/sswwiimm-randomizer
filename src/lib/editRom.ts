@@ -20,10 +20,10 @@ export function editRom(originalRom: Uint8Array, settings: RandomizerSettings): 
   console.log(
     settings,
     "Starter patch check:",
-    
+
   );
 
-  // patchStarters(rom)
+  patchStarters(rom)
   patchTitleMons(rom)
 
   console.log(
