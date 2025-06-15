@@ -2,7 +2,6 @@
 
 import { RandomizerSettings } from "@/lib/store";
 import { patchStarters } from "./patchers/patchStarters";
-import { getROMOffset } from "./utils";
 import { patchTitleMons } from "./patchers/patchTitleMons";
 
 const isRomModified = (a: Uint8Array, b: Uint8Array): boolean => {
