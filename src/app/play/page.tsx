@@ -1,8 +1,14 @@
+// in /play/page.tsx or .js
 "use client";
 
-import GameBoyCanvas from "@/components/emulator/GameBoyCanvas";
+import dynamic from "next/dynamic";
 import { useAppStore } from "@/lib/store";
 import Link from "next/link";
+
+// dynamically import GameBoyCanvas so it's only loaded client-side
+const GameBoyCanvas = dynamic(() => import("@/components/emulator/GameBoyCanvas"), {
+  ssr: false,
+});
 
 export default function PlayPage() {
   const rom = useAppStore((state) => state.romBuffer);
