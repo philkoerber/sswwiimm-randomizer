@@ -39,7 +39,5 @@ export function editRom(originalRom: Uint8Array, settings: RandomizerSettings): 
     console.error("The ROM was not modified. Are the patch settings correct?");
   }
 
-
-
   return rom;
 }
