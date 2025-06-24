@@ -40,7 +40,7 @@ export default function ChatPage() {
             }
             voiceChatTimeoutRef.current = setTimeout(() => {
                 setIsVoiceChatActive(false);
-                
+
             }, 400);
         });
         return () => {

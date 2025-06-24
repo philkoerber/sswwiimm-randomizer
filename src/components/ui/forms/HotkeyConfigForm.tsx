@@ -34,6 +34,15 @@ export default function HotkeyConfigForm() {
         // Listen for controller changes
         const unsubscribeControllers = controllerManager.onControllersChange((newControllers) => {
             setControllers(newControllers);
+            // Auto-select the first controller if available and none is selected
+            setHotkeyConfig((prevConfig) => {
+                if (!prevConfig.controllerId && newControllers.length > 0) {
+                    const newConfig = { ...prevConfig, controllerId: newControllers[0].id };
+                    controllerManager.setHotkeyConfig(newConfig);
+                    return newConfig;
+                }
+                return prevConfig;
+            });
             // Check for button presses to trigger flash
             setFlashButtonStates((prev) => {
                 const updated: { [controllerId: string]: boolean } = { ...prev };
