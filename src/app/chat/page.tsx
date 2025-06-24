@@ -21,8 +21,8 @@ export default function ChatPage() {
             timestamp: new Date(),
         },
     ]);
-    const [inputValue, setInputValue] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    // const [inputValue, setInputValue] = useState("");
+    // const [isLoading, setIsLoading] = useState(false);
     const [isVoiceChatActive, setIsVoiceChatActive] = useState(false);
     const voiceChatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
