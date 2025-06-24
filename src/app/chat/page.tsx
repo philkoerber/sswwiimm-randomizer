@@ -96,33 +96,33 @@ export default function ChatPage() {
         };
     }, [isVoiceChatActive]);
 
-    const handleSendMessage = async () => {
-        if (!inputValue.trim() || isLoading) return;
-
-        const userMessage: Message = {
-            id: Date.now().toString(),
-            text: inputValue.trim(),
-            sender: "user",
-            timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, userMessage]);
-        setInputValue("");
-        setIsLoading(true);
-
-        // TODO: Replace with actual API call to Node.js backend
-        // For now, simulate a response
-        setTimeout(() => {
-            const botMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                text: "This is a placeholder response. The real chatbot backend is coming soon!",
-                sender: "bot",
-                timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, botMessage]);
-            setIsLoading(false);
-        }, 1000);
-    };
+    // const handleSendMessage = async () => {
+    //     if (!inputValue.trim() || isLoading) return;
+    // 
+    //     const userMessage: Message = {
+    //         id: Date.now().toString(),
+    //         text: inputValue.trim(),
+    //         sender: "user",
+    //         timestamp: new Date(),
+    //     };
+    // 
+    //     setMessages((prev) => [...prev, userMessage]);
+    //     setInputValue("");
+    //     setIsLoading(true);
+    // 
+    //     // TODO: Replace with actual API call to Node.js backend
+    //     // For now, simulate a response
+    //     setTimeout(() => {
+    //         const botMessage: Message = {
+    //             id: (Date.now() + 1).toString(),
+    //             text: "This is a placeholder response. The real chatbot backend is coming soon!",
+    //             sender: "bot",
+    //             timestamp: new Date(),
+    //         };
+    //         setMessages((prev) => [...prev, botMessage]);
+    //         setIsLoading(false);
+    //     }, 1000);
+    // };
 
     // const handleKeyPress = (e: React.KeyboardEvent) => {
     //     if (e.key === "Enter" && !e.shiftKey) {
