@@ -56,16 +56,12 @@ class ControllerManager {
 
         this.controllers.set(gamepad.id, controller);
         this.notifyListeners();
-
-        console.log(`Controller connected: ${gamepad.id}`);
     }
 
     private handleGamepadDisconnected(event: GamepadEvent) {
         const gamepad = event.gamepad;
         this.controllers.delete(gamepad.id);
         this.notifyListeners();
-
-        console.log(`Controller disconnected: ${gamepad.id}`);
     }
 
     private handleKeyDown(event: KeyboardEvent) {
@@ -85,12 +81,6 @@ class ControllerManager {
 
                 const existingController = this.controllers.get(gamepad.id);
                 if (existingController) {
-                    // Log all button presses for debugging
-                    gamepad.buttons.forEach((button, index) => {
-                        if (button.pressed) {
-                            console.log(`Controller ${gamepad.id} - Button ${index} (${getButtonName(index)}) pressed`);
-                        }
-                    });
 
                     // Check if button states have changed
                     const buttonPressed = gamepad.buttons.some(button => button.pressed);
@@ -100,7 +90,6 @@ class ControllerManager {
 
                         const targetButton = gamepad.buttons[this.hotkeyConfig.buttonIndex];
                         if (targetButton && targetButton.pressed) {
-                            console.log(`Hotkey triggered! Button ${this.hotkeyConfig.buttonIndex} pressed on controller ${gamepad.id}`);
                             this.triggerVoiceChat();
                         }
                     }
@@ -123,7 +112,6 @@ class ControllerManager {
     }
 
     private triggerVoiceChat() {
-        console.log('Voice chat hotkey triggered!');
         this.hotkeyListeners.forEach(listener => listener());
     }
 

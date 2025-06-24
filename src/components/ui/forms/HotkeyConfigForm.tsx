@@ -54,15 +54,8 @@ export default function HotkeyConfigForm() {
             });
         });
 
-        // Listen for voice chat triggers
-        const unsubscribeVoiceChat = controllerManager.onVoiceChatTrigger(() => {
-            console.log('Voice chat triggered via hotkey!');
-            // TODO: Implement voice chat activation
-        });
-
         return () => {
             unsubscribeControllers();
-            unsubscribeVoiceChat();
         };
     }, []);
 
@@ -226,17 +219,6 @@ export default function HotkeyConfigForm() {
                                 </Button>
                             )}
                         </div>
-                        {hotkeyConfig.controllerId && hotkeyConfig.buttonIndex !== undefined && (
-                            <p className="text-sm text-muted-foreground">
-                                Button: {(() => {
-                                    let buttonName = getButtonName(hotkeyConfig.buttonIndex);
-                                    if (buttonName.startsWith('Button ')) {
-                                        buttonName = `Button ${hotkeyConfig.buttonIndex}`;
-                                    }
-                                    return buttonName;
-                                })()}
-                            </p>
-                        )}
                     </div>
                 )}
 

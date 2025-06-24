@@ -40,6 +40,7 @@ export default function ChatPage() {
             }
             voiceChatTimeoutRef.current = setTimeout(() => {
                 setIsVoiceChatActive(false);
+                
             }, 400);
         });
         return () => {
@@ -72,7 +73,21 @@ export default function ChatPage() {
                         if (!stopped) {
                             const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
                             console.log('Recorded audio blob:', audioBlob);
-                            // TODO: send audioBlob to backend here
+                            // Send audioBlob to backend
+                            fetch('/api/upload-audio', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'audio/webm',
+                                },
+                                body: audioBlob,
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    console.log('Backend response:', data);
+                                })
+                                .catch(err => {
+                                    console.error('Error uploading audio:', err);
+                                });
                         }
                     };
                     mediaRecorder.start();

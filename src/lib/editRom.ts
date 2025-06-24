@@ -16,23 +16,10 @@ const isRomModified = (a: Uint8Array, b: Uint8Array): boolean => {
 export function editRom(originalRom: Uint8Array, settings: RandomizerSettings): Uint8Array {
   const rom = new Uint8Array(originalRom); // Clone to avoid mutating the original
 
-  console.log(
-    settings,
-    "Starter patch check:",
-
-  );
-
   patchStarters(rom)
   patchTitleMons(rom)
 
-  console.log(
-    "Starter patch check:",
-    {
-      Bulbasaur: rom[0x1C2AD],
-      Charmander: rom[0x1C2D7],
-      Squirtle: rom[0x1C301],
-    }
-  );
+  console.log(settings)
 
   const isDifferent = isRomModified(rom, originalRom);
   if (!isDifferent) {
