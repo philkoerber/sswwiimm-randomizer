@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Send, Bot, User, Mic } from "lucide-react";
+import { Mic } from "lucide-react";
 import HotkeyConfigForm from "@/components/ui/forms/HotkeyConfigForm";
 import { useAppStore } from "@/lib/store";
 import { controllerManager } from "@/lib/controllerUtils";
