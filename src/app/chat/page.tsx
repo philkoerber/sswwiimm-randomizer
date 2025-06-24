@@ -24,12 +24,13 @@ export default function ChatPage() {
     ]);
     const [inputValue, setInputValue] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const isVoiceChatHotkeySet = useAppStore((s) => s.isVoiceChatHotkeySet);
     const [isVoiceChatActive, setIsVoiceChatActive] = useState(false);
     const voiceChatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const [hasMicPermission, setHasMicPermission] = useState(true);
+
+    console.log(messages)
 
     useEffect(() => {
         // Subscribe to voice chat hotkey trigger
