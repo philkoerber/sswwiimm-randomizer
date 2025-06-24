@@ -19,7 +19,22 @@ export async function POST(req: NextRequest) {
             model: 'whisper-1',
         });
 
-        return NextResponse.json({ success: true, text: transcription.text });
+        // Generate TTS audio from the transcribed text
+        const ttsResponse = await openai.audio.speech.create({
+            model: 'tts-1',
+            voice: 'echo',
+            input: transcription.text,
+        });
+        const audioBuffer = Buffer.from(await ttsResponse.arrayBuffer());
+
+        // Return both text and audio as a multipart response
+        return new NextResponse(audioBuffer, {
+            status: 200,
+            headers: {
+                'Content-Type': 'audio/mpeg',
+                'X-Transcription-Text': encodeURIComponent(transcription.text),
+            },
+        });
     } catch (error: unknown) {
         if (error instanceof APIError) {
             console.error('Transcription error:', error);

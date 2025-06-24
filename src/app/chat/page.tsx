@@ -28,6 +28,7 @@ export default function ChatPage() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const [hasMicPermission, setHasMicPermission] = useState(true);
+    const [lastTranscription, setLastTranscription] = useState<string | null>(null);
 
     // console.log(messages)
 
@@ -54,9 +55,7 @@ export default function ChatPage() {
     // Audio recording logic
     useEffect(() => {
         let stopped = false;
-        // Start recording when isVoiceChatActive becomes true
         if (isVoiceChatActive) {
-            // Request mic access and start MediaRecorder
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then((stream) => {
                     setHasMicPermission(true);
@@ -72,7 +71,6 @@ export default function ChatPage() {
                         stream.getTracks().forEach((track) => track.stop());
                         if (!stopped) {
                             const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                            console.log('Recorded audio blob:', audioBlob);
                             // Send audioBlob to backend
                             fetch('/api/upload-audio', {
                                 method: 'POST',
@@ -81,9 +79,16 @@ export default function ChatPage() {
                                 },
                                 body: audioBlob,
                             })
-                                .then(res => res.json())
-                                .then(data => {
-                                    console.log('Backend response:', data);
+                                .then(async res => {
+                                    if (!res.ok) throw new Error('Failed to get TTS response');
+                                    const audioArrayBuffer = await res.arrayBuffer();
+                                    const audio = new Audio();
+                                    const transcription = decodeURIComponent(res.headers.get('X-Transcription-Text') || '');
+                                    const audioBlob = new Blob([audioArrayBuffer], { type: 'audio/mpeg' });
+                                    audio.src = URL.createObjectURL(audioBlob);
+                                    audio.play();
+                                    // Optionally, show the transcription somewhere
+                                    setLastTranscription(transcription);
                                 })
                                 .catch(err => {
                                     console.error('Error uploading audio:', err);
@@ -97,13 +102,11 @@ export default function ChatPage() {
                     console.error('Microphone access denied:', err);
                 });
         } else {
-            // Stop recording when isVoiceChatActive becomes false
             if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
                 stopped = true;
                 mediaRecorderRef.current.stop();
             }
         }
-        // Cleanup on unmount
         return () => {
             if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
                 mediaRecorderRef.current.stop();
@@ -166,6 +169,9 @@ export default function ChatPage() {
                 <span className="text-2xl font-sans">Voice chat: Listening</span>
                 {!hasMicPermission && (
                     <span className="text-red-500 mt-4">Microphone access denied. Please allow mic access.</span>
+                )}
+                {lastTranscription && (
+                    <span className="mt-4 text-lg text-center">"{lastTranscription}"</span>
                 )}
             </div>
         </div>
