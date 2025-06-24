@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Mic } from "lucide-react";
 import HotkeyConfigForm from "@/components/ui/forms/HotkeyConfigForm";
-import { useAppStore } from "@/lib/store";
 import { controllerManager } from "@/lib/controllerUtils";
 
 interface Message {
@@ -125,12 +124,13 @@ export default function ChatPage() {
         }, 1000);
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    };
+    // const handleKeyPress = (e: React.KeyboardEvent) => {
+    //     if (e.key === "Enter" && !e.shiftKey) {
+    //         e.preventDefault();
+    //         handleSendMessage();
+    //     }
+    // };
+
 
     return (
         <div className="w-full max-w-4xl mx-auto p-6">
