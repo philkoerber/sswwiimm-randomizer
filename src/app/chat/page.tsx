@@ -171,7 +171,7 @@ export default function ChatPage() {
                     <span className="text-red-500 mt-4">Microphone access denied. Please allow mic access.</span>
                 )}
                 {lastTranscription && (
-                    <span className="mt-4 text-lg text-center">"{lastTranscription}"</span>
+                    <span className="mt-4 text-lg text-center">{lastTranscription}</span>
                 )}
             </div>
         </div>
