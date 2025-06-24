@@ -10,14 +10,12 @@ export interface HotkeyConfig {
     controllerId?: string;
     buttonIndex?: number;
     keyboardKey?: string;
-    enabled: boolean;
 }
 
 class ControllerManager {
     private controllers: Map<string, Controller> = new Map();
     private hotkeyConfig: HotkeyConfig = {
-        enabled: false,
-        keyboardKey: 'v', // Default to 'v' key
+        // No default hotkey
     };
     private listeners: Set<(controllers: Controller[]) => void> = new Set();
     private hotkeyListeners: Set<() => void> = new Set();
@@ -71,7 +69,7 @@ class ControllerManager {
     }
 
     private handleKeyDown(event: KeyboardEvent) {
-        if (this.hotkeyConfig.enabled && this.hotkeyConfig.keyboardKey === event.key.toLowerCase()) {
+        if (this.hotkeyConfig.keyboardKey === event.key.toLowerCase()) {
             event.preventDefault();
             this.triggerVoiceChat();
         }
@@ -96,7 +94,7 @@ class ControllerManager {
 
                     // Check if button states have changed
                     const buttonPressed = gamepad.buttons.some(button => button.pressed);
-                    if (buttonPressed && this.hotkeyConfig.enabled &&
+                    if (buttonPressed &&
                         this.hotkeyConfig.controllerId === gamepad.id &&
                         this.hotkeyConfig.buttonIndex !== undefined) {
 
@@ -171,11 +169,7 @@ export const controllerManager = new ControllerManager();
 
 // Utility functions
 export const getButtonName = (index: number): string => {
-    const buttonNames = [
-        'A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'Back', 'Start',
-        'Left Stick', 'Right Stick', 'D-Pad Up', 'D-Pad Down', 'D-Pad Left', 'D-Pad Right'
-    ];
-    return buttonNames[index] || `Button ${index}`;
+    return `Button ${index}`;
 };
 
 export const getControllerButtonState = (controller: Controller, buttonIndex: number): boolean => {

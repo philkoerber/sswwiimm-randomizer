@@ -14,6 +14,8 @@ interface AppState {
   settings: RandomizerSettings;
   setRom: (buffer: Uint8Array) => void;
   setSettings: (settings: Partial<RandomizerSettings>) => void;
+  isVoiceChatHotkeySet: boolean;
+  setVoiceChatHotkeySet: (isSet: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -29,4 +31,6 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       settings: { ...state.settings, ...partialSettings },
     })),
+  isVoiceChatHotkeySet: false,
+  setVoiceChatHotkeySet: (isSet) => set({ isVoiceChatHotkeySet: isSet }),
 }));

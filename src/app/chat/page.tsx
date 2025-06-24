@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Mic } from "lucide-react";
 import HotkeyConfigForm from "@/components/ui/forms/HotkeyConfigForm";
+import { useAppStore } from "@/lib/store";
+import { controllerManager } from "@/lib/controllerUtils";
 
 interface Message {
     id: string;
@@ -25,6 +27,77 @@ export default function ChatPage() {
     ]);
     const [inputValue, setInputValue] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const isVoiceChatHotkeySet = useAppStore((s) => s.isVoiceChatHotkeySet);
+    const [isVoiceChatActive, setIsVoiceChatActive] = useState(false);
+    const voiceChatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const [hasMicPermission, setHasMicPermission] = useState(true);
+
+    useEffect(() => {
+        // Subscribe to voice chat hotkey trigger
+        const unsubscribe = controllerManager.onVoiceChatTrigger(() => {
+            setIsVoiceChatActive(true);
+            if (voiceChatTimeoutRef.current) {
+                clearTimeout(voiceChatTimeoutRef.current);
+            }
+            voiceChatTimeoutRef.current = setTimeout(() => {
+                setIsVoiceChatActive(false);
+            }, 400);
+        });
+        return () => {
+            unsubscribe();
+            if (voiceChatTimeoutRef.current) {
+                clearTimeout(voiceChatTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    // Audio recording logic
+    useEffect(() => {
+        let stopped = false;
+        // Start recording when isVoiceChatActive becomes true
+        if (isVoiceChatActive) {
+            // Request mic access and start MediaRecorder
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((stream) => {
+                    setHasMicPermission(true);
+                    const mediaRecorder = new window.MediaRecorder(stream);
+                    mediaRecorderRef.current = mediaRecorder;
+                    audioChunksRef.current = [];
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) {
+                            audioChunksRef.current.push(e.data);
+                        }
+                    };
+                    mediaRecorder.onstop = () => {
+                        stream.getTracks().forEach((track) => track.stop());
+                        if (!stopped) {
+                            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                            console.log('Recorded audio blob:', audioBlob);
+                            // TODO: send audioBlob to backend here
+                        }
+                    };
+                    mediaRecorder.start();
+                })
+                .catch((err) => {
+                    setHasMicPermission(false);
+                    console.error('Microphone access denied:', err);
+                });
+        } else {
+            // Stop recording when isVoiceChatActive becomes false
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+                stopped = true;
+                mediaRecorderRef.current.stop();
+            }
+        }
+        // Cleanup on unmount
+        return () => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+                mediaRecorderRef.current.stop();
+            }
+        };
+    }, [isVoiceChatActive]);
 
     const handleSendMessage = async () => {
         if (!inputValue.trim() || isLoading) return;
@@ -64,103 +137,23 @@ export default function ChatPage() {
     return (
         <div className="w-full max-w-4xl mx-auto p-6">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-dotGothic16)" }}>
-                    AI Chat Assistant
+                <h1 className="text-3xl mb-2" style={{ fontFamily: "var(--font-dotGothic16)" }}>
+                    Voice Chat
                 </h1>
                 <p className="text-muted-foreground">
-                    Ask me anything about the Pokémon Red randomizer, get help with settings, or just chat!
+                    Configure your voice chat hotkey below. Press the hotkey to activate voice chat.
                 </p>
             </div>
-
-            {/* Hotkey Configuration - Always Visible */}
             <div className="mb-6">
                 <HotkeyConfigForm />
             </div>
-
-            <Card className="h-[600px] flex flex-col">
-                <CardHeader className="border-b">
-                    <CardTitle className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        Chat Assistant
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col p-0">
-                    {/* Messages */}
-                    <div className="flex-1 overflow-y-auto space-y-4 p-6">
-                        {messages.map((message) => (
-                            <div
-                                key={message.id}
-                                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                            >
-                                <div className="flex gap-3 max-w-[80%]">
-                                    {message.sender === "bot" && (
-                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                            <Bot className="w-4 h-4 text-primary" />
-                                        </div>
-                                    )}
-                                    <div
-                                        className={`p-3 rounded-lg ${message.sender === "user"
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-muted/50 border"
-                                            }`}
-                                    >
-                                        <p className="text-sm leading-relaxed">{message.text}</p>
-                                        <p className="text-xs opacity-70 mt-2">
-                                            {message.timestamp.toLocaleTimeString()}
-                                        </p>
-                                    </div>
-                                    {message.sender === "user" && (
-                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                            <User className="w-4 h-4 text-primary" />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                        {isLoading && (
-                            <div className="flex justify-start">
-                                <div className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                        <Bot className="w-4 h-4 text-primary" />
-                                    </div>
-                                    <div className="bg-muted/50 border p-3 rounded-lg">
-                                        <div className="flex space-x-1">
-                                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Input */}
-                    <div className="border-t p-4">
-                        <div className="flex gap-2">
-                            <Input
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                placeholder="Type your message..."
-                                disabled={isLoading}
-                                className="flex-1"
-                            />
-                            <Button
-                                onClick={handleSendMessage}
-                                disabled={!inputValue.trim() || isLoading}
-                                size="icon"
-                            >
-                                <Send className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-                <p>💬 Real-time chatbot powered by Node.js & Llama coming soon!</p>
-                <p className="mt-1">🎮 Configure voice chat hotkeys above</p>
+            {/* Inline voice chat indicator - always visible, greyed out if not active */}
+            <div className={`flex flex-col items-center justify-center py-16 transition-all duration-200 ${isVoiceChatActive ? '' : 'opacity-10 grayscale'}`}>
+                <Mic className="w-24 h-24 text-primary animate-pulse mb-4" />
+                <span className="text-2xl font-sans">Voice chat: Listening</span>
+                {!hasMicPermission && (
+                    <span className="text-red-500 mt-4">Microphone access denied. Please allow mic access.</span>
+                )}
             </div>
         </div>
     );
