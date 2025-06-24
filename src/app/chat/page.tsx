@@ -5,22 +5,22 @@ import { Mic } from "lucide-react";
 import HotkeyConfigForm from "@/components/ui/forms/HotkeyConfigForm";
 import { controllerManager } from "@/lib/controllerUtils";
 
-interface Message {
-    id: string;
-    text: string;
-    sender: "user" | "bot";
-    timestamp: Date;
-}
+// interface Message {
+//     id: string;
+//     text: string;
+//     sender: "user" | "bot";
+//     timestamp: Date;
+// }
 
 export default function ChatPage() {
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: "1",
-            text: "Hello! I'm your AI assistant. How can I help you with the Pokémon Red randomizer today?",
-            sender: "bot",
-            timestamp: new Date(),
-        },
-    ]);
+    // const [messages, setMessages] = useState<Message[]>([
+    //     {
+    //         id: "1",
+    //         text: "Hello! I'm your AI assistant. How can I help you with the Pokémon Red randomizer today?",
+    //         sender: "bot",
+    //         timestamp: new Date(),
+    //     },
+    // ]);
     // const [inputValue, setInputValue] = useState("");
     // const [isLoading, setIsLoading] = useState(false);
     const [isVoiceChatActive, setIsVoiceChatActive] = useState(false);
@@ -29,7 +29,7 @@ export default function ChatPage() {
     const audioChunksRef = useRef<Blob[]>([]);
     const [hasMicPermission, setHasMicPermission] = useState(true);
 
-    console.log(messages)
+    // console.log(messages)
 
     useEffect(() => {
         // Subscribe to voice chat hotkey trigger
