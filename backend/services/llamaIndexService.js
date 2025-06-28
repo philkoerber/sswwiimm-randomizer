@@ -1,12 +1,9 @@
-const { Document } = require('llamaindex');
-const { VectorStoreIndex } = require('llamaindex');
-const { OpenAI } = require('llamaindex/llms/openai');
+const { openai } = require("@llamaindex/openai");
 const fs = require('fs');
 const path = require('path');
 
 class LlamaIndexService {
     constructor() {
-        this.index = null;
         this.llm = null;
         this.csvData = null;
         this.initializeLLM();
@@ -21,15 +18,18 @@ class LlamaIndexService {
             const apiKey = process.env.OPENAI_API_KEY;
             if (!apiKey) {
                 console.warn('OpenAI API key not found. Some features may not work.');
+                console.log('Please set OPENAI_API_KEY environment variable');
                 return;
             }
 
-            this.llm = new OpenAI({
+            console.log('Initializing OpenAI LLM...');
+            this.llm = openai({
                 apiKey: apiKey,
-                model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+                model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
                 temperature: 0.1,
-                maxTokens: 1000
+                maxTokens: 1000,
             });
+            console.log('LLM initialized successfully');
         } catch (error) {
             console.error('Error initializing LLM:', error);
         }
@@ -40,6 +40,7 @@ class LlamaIndexService {
      */
     async loadCSVData() {
         try {
+            console.log('Loading CSV data...');
             const csvDir = path.join(__dirname, '../data/csv');
 
             if (!fs.existsSync(csvDir)) {
@@ -55,52 +56,17 @@ class LlamaIndexService {
                 return;
             }
 
+            console.log(`Found ${files.length} CSV files:`, files);
+
             // Load the first CSV file found (you can modify this to load multiple files)
             const csvFile = files[0];
             const csvPath = path.join(csvDir, csvFile);
             this.csvData = fs.readFileSync(csvPath, 'utf8');
 
-            console.log(`Loaded CSV data from: ${csvFile}`);
-
-            // Index the CSV data
-            await this.indexCSVData();
+            console.log(`Loaded CSV data from: ${csvFile} (${this.csvData.length} characters)`);
 
         } catch (error) {
             console.error('Error loading CSV data:', error);
-        }
-    }
-
-    /**
-     * Index the loaded CSV data
-     */
-    async indexCSVData() {
-        try {
-            if (!this.llm) {
-                throw new Error('LLM not initialized. Please check your OpenAI API key.');
-            }
-
-            if (!this.csvData) {
-                console.log('No CSV data to index');
-                return;
-            }
-
-            // Create a document from CSV data
-            const document = new Document({
-                text: this.formatCSVForIndexing(this.csvData),
-                metadata: {
-                    type: 'csv',
-                    timestamp: new Date().toISOString()
-                }
-            });
-
-            // Create vector index
-            this.index = await VectorStoreIndex.fromDocuments([document], {
-                llm: this.llm
-            });
-
-            console.log('CSV data indexed successfully');
-        } catch (error) {
-            console.error('Error indexing CSV data:', error);
         }
     }
 
@@ -116,23 +82,37 @@ class LlamaIndexService {
                 throw new Error('LLM not initialized. Please check your OpenAI API key.');
             }
 
-            // If no index, return a basic response
-            if (!this.index) {
+            // If no CSV data, return a basic response
+            if (!this.csvData) {
                 return this.getBasicResponse(query, sessionContext);
             }
 
-            // Create query engine
-            const queryEngine = this.index.asQueryEngine();
+            // Create a simple prompt with the CSV data
+            const csvContext = this.formatCSVForIndexing(this.csvData);
 
-            // Add session context to the query if provided
-            const enhancedQuery = sessionContext
-                ? `Previous conversation:\n${sessionContext}\n\nCurrent question: ${query}`
-                : query;
+            let prompt = `You are a helpful assistant that can answer questions about CSV data. Here is the CSV data you have access to:\n\n${csvContext}\n\n`;
 
-            // Execute query
-            const response = await queryEngine.query(enhancedQuery);
+            if (sessionContext) {
+                prompt += `Previous conversation:\n${sessionContext}\n\n`;
+            }
 
-            return response.response;
+            prompt += `Please answer the following question based on the CSV data above: ${query}`;
+
+            // Use the LLM directly instead of the query engine
+            const response = await this.llm.complete({
+                prompt: prompt,
+                maxTokens: 1000,
+                temperature: 0.1
+            });
+
+            // Extract the response text
+            if (response && response.text) {
+                return response.text.trim();
+            } else if (response && response.message) {
+                return response.message.content || response.message;
+            } else {
+                throw new Error('No valid response received from LLM');
+            }
         } catch (error) {
             console.error('Error querying:', error);
             throw new Error(`Failed to process query: ${error.message}`);
@@ -196,7 +176,6 @@ class LlamaIndexService {
         return {
             csvLoaded: !!this.csvData,
             csvSize: this.csvData ? this.csvData.length : 0,
-            indexCreated: !!this.index,
             llmInitialized: !!this.llm,
             model: this.llm ? process.env.OPENAI_MODEL || 'gpt-3.5-turbo' : 'none'
         };

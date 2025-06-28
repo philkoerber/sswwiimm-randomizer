@@ -46,7 +46,7 @@ npm install
 
 3. Copy the environment file and configure it:
 ```bash
-cp env.example .env
+cp .env.local .env
 ```
 
 4. Edit `.env` and add your OpenAI API key:
