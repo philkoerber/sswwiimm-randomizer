@@ -99,6 +99,8 @@ Thumbs.db
 # Application specific
 data/csv/*
 !data/csv/.gitkeep
+!data/csv/gen1_pokemon_data.csv
+!data/csv/gen1_moves.csv
 
 # Build artifacts
 build/
