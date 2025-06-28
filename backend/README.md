@@ -214,7 +214,6 @@ The application includes health check endpoints for monitoring:
    - `NODE_ENV`: production
    - `OPENAI_API_KEY`: Your OpenAI API key
    - `FRONTEND_URL`: Your frontend URL
-   - `JWT_SECRET`: A secure random string
 
 4. **Deploy** - Render will automatically deploy your backend
 
@@ -223,7 +222,6 @@ The application includes health check endpoints for monitoring:
 NODE_ENV=production
 OPENAI_API_KEY=your_openai_api_key
 FRONTEND_URL=https://your-frontend-url.com
-JWT_SECRET=your_secure_jwt_secret
 RATE_LIMIT_WINDOW=900000
 RATE_LIMIT_MAX=100
 ```

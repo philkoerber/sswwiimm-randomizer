@@ -187,10 +187,10 @@ export default function ChatPage() {
     return (
         <div className="w-full max-w-4xl mx-auto p-6">
             <div className="mb-8">
-                <h1 className="text-3xl mb-2" style={{ fontFamily: "var(--font-dotGothic16)" }}>
+                <h1 className="text-4xl font-normal mb-2 tracking-tight" style={{ fontFamily: "var(--font-dotGothic16)" }}>
                     Voice Chat
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground" style={{ fontFamily: "var(--font-onest)" }}>
                     Configure your voice chat hotkey below. Press the hotkey to activate voice chat.
                 </p>
             </div>

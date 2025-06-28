@@ -118,5 +118,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent layout shift from scrollbar appearance/disappearance */
+    overflow-y: scroll;
+  }
+  html {
+    /* Ensure consistent scrollbar behavior */
+    scrollbar-gutter: stable;
   }
 }

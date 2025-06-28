@@ -33,9 +33,9 @@ export default function RootLayout({
         className={`${dotGothic16.variable} ${onest.variable} antialiased`}
       >
         <Header />
-        <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
+        <main className="min-h-[calc(100vh-200px)] pt-8 pb-8">
           {children}
-        </div>
+        </main>
 
         {/* Hidden test page link - only visible on hover */}
         <div className="fixed bottom-4 right-4 opacity-0 hover:opacity-100 transition-opacity duration-300">

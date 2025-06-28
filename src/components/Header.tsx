@@ -9,11 +9,9 @@ export default function Header() {
         </Link>
 
         <nav className="text-sm text-muted-foreground space-x-4 hidden sm:block" style={{ fontFamily: "var(--font-onest)" }}>
-          <Link href="/" className="hover:text-primary transition">Home</Link>
-          <Link href="/play" className="hover:text-primary transition">Play</Link>
+          <Link href="/" className="hover:text-primary transition">Randomizer</Link>
           <Link href="/chat" className="hover:text-primary transition">Chat</Link>
           <Link href="/about" className="hover:text-primary transition">About</Link>
-          <Link href="/faq" className="hover:text-primary transition">FAQ</Link>
         </nav>
       </div>
     </header>
