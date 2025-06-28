@@ -29,10 +29,27 @@ export default function ChatPage() {
     const audioChunksRef = useRef<Blob[]>([]);
     const [hasMicPermission, setHasMicPermission] = useState(true);
     const [lastTranscription, setLastTranscription] = useState<string | null>(null);
+    const [lastResponse, setLastResponse] = useState<string | null>(null);
+    const [sessionId, setSessionId] = useState<string | null>(null);
+    const recordingStartTimeRef = useRef<number | null>(null);
 
     // console.log(messages)
 
     useEffect(() => {
+        // Create a chat session on component mount
+        fetch(`${process.env.BACKEND_URL || 'http://localhost:3001'}/api/chat/session`, {
+            method: 'POST',
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setSessionId(data.sessionId);
+                }
+            })
+            .catch(err => {
+                console.error('Failed to create session:', err);
+            });
+
         // Subscribe to voice chat hotkey trigger
         const unsubscribe = controllerManager.onVoiceChatTrigger(() => {
             setIsVoiceChatActive(true);
@@ -62,6 +79,8 @@ export default function ChatPage() {
                     const mediaRecorder = new window.MediaRecorder(stream);
                     mediaRecorderRef.current = mediaRecorder;
                     audioChunksRef.current = [];
+                    recordingStartTimeRef.current = Date.now();
+
                     mediaRecorder.ondataavailable = (e) => {
                         if (e.data.size > 0) {
                             audioChunksRef.current.push(e.data);
@@ -70,28 +89,43 @@ export default function ChatPage() {
                     mediaRecorder.onstop = () => {
                         stream.getTracks().forEach((track) => track.stop());
                         if (!stopped) {
+                            const recordingDuration = Date.now() - (recordingStartTimeRef.current || Date.now());
+
+                            // Only send if recording is at least 800ms
+                            if (recordingDuration < 800) {
+                                console.log(`Recording too short (${recordingDuration}ms), not sending`);
+                                return;
+                            }
+
                             const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+
+                            // Create FormData to send audio file
+                            const formData = new FormData();
+                            formData.append('audio', audioBlob, 'audio.webm');
+
                             // Send audioBlob to backend
-                            fetch('/api/upload-audio', {
+                            fetch('/api/voice-chat', {
                                 method: 'POST',
                                 headers: {
-                                    'Content-Type': 'audio/webm',
+                                    'X-Session-Id': sessionId || '',
                                 },
-                                body: audioBlob,
+                                body: formData,
                             })
                                 .then(async res => {
-                                    if (!res.ok) throw new Error('Failed to get TTS response');
+                                    if (!res.ok) throw new Error('Failed to get voice chat response');
                                     const audioArrayBuffer = await res.arrayBuffer();
                                     const audio = new Audio();
                                     const transcription = decodeURIComponent(res.headers.get('X-Transcription-Text') || '');
+                                    const responseText = decodeURIComponent(res.headers.get('X-Response-Text') || '');
                                     const audioBlob = new Blob([audioArrayBuffer], { type: 'audio/mpeg' });
                                     audio.src = URL.createObjectURL(audioBlob);
                                     audio.play();
-                                    // Optionally, show the transcription somewhere
+                                    // Show both transcription and response
                                     setLastTranscription(transcription);
+                                    setLastResponse(responseText);
                                 })
                                 .catch(err => {
-                                    console.error('Error uploading audio:', err);
+                                    console.error('Error in voice chat:', err);
                                 });
                         }
                     };
@@ -112,7 +146,7 @@ export default function ChatPage() {
                 mediaRecorderRef.current.stop();
             }
         };
-    }, [isVoiceChatActive]);
+    }, [isVoiceChatActive, sessionId]);
 
     // const handleSendMessage = async () => {
     //     if (!inputValue.trim() || isLoading) return;
@@ -171,7 +205,16 @@ export default function ChatPage() {
                     <span className="text-red-500 mt-4">Microphone access denied. Please allow mic access.</span>
                 )}
                 {lastTranscription && (
-                    <span className="mt-4 text-lg text-center">{lastTranscription}</span>
+                    <div className="mt-4 text-center">
+                        <div className="text-sm text-muted-foreground mb-1">You said:</div>
+                        <div className="text-lg">{lastTranscription}</div>
+                    </div>
+                )}
+                {lastResponse && (
+                    <div className="mt-4 text-center">
+                        <div className="text-sm text-muted-foreground mb-1">Assistant replied:</div>
+                        <div className="text-lg">{lastResponse}</div>
+                    </div>
                 )}
             </div>
         </div>

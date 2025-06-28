@@ -25,7 +25,7 @@ class LlamaIndexService {
             console.log('Initializing OpenAI LLM...');
             this.llm = openai({
                 apiKey: apiKey,
-                model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
+                model: "gpt-3.5-turbo",
                 temperature: 0.1,
                 maxTokens: 1000,
             });
@@ -58,12 +58,22 @@ class LlamaIndexService {
 
             console.log(`Found ${files.length} CSV files:`, files);
 
-            // Load the first CSV file found (you can modify this to load multiple files)
-            const csvFile = files[0];
-            const csvPath = path.join(csvDir, csvFile);
-            this.csvData = fs.readFileSync(csvPath, 'utf8');
+            // Load all CSV files and combine them with proper context
+            this.csvData = '';
 
-            console.log(`Loaded CSV data from: ${csvFile} (${this.csvData.length} characters)`);
+            for (const file of files) {
+                const csvPath = path.join(csvDir, file);
+                const fileData = fs.readFileSync(csvPath, 'utf8');
+
+                // Add file context to help distinguish between different data types
+                this.csvData += `\n=== ${file.toUpperCase()} ===\n`;
+                this.csvData += fileData;
+                this.csvData += '\n';
+
+                console.log(`Loaded CSV data from: ${file} (${fileData.length} characters)`);
+            }
+
+            console.log(`Total loaded data: ${this.csvData.length} characters`);
 
         } catch (error) {
             console.error('Error loading CSV data:', error);
@@ -90,7 +100,33 @@ class LlamaIndexService {
             // Create a simple prompt with the CSV data
             const csvContext = this.formatCSVForIndexing(this.csvData);
 
-            let prompt = `You are a helpful assistant that can answer questions about CSV data. Here is the CSV data you have access to:\n\n${csvContext}\n\n`;
+            let prompt = `You are a helpful assistant that answers questions about Pokemon from Generation 1. You have access to comprehensive Pokemon data including:
+
+- Pokemon base stats (HP, Attack, Defense, Special, Speed)
+- Pokemon types
+- Evolution information
+- Level-up moves
+- TM/HM compatibility
+- Move information (power, PP, accuracy, priority, type, class)
+- Which Pokemon can learn each move
+
+IMPORTANT: When someone asks about a Pokemon's "stats", they are asking about the base stats (HP, Attack, Defense, Special, Speed), NOT move statistics.
+
+RESPONSE GUIDELINES:
+- Provide only factual information from the data
+- Use clear, direct statements
+- Avoid subjective opinions, recommendations, or commentary
+- Do not include phrases like "it's great", "it's useful", "you should", "it's known for", etc.
+- Focus on the raw data and facts only
+- Do not mention data sources, file names, or internal processes
+- Answer naturally as if you just know this information
+
+Examples of factual response formats:
+- For Pokemon stats: "Pikachu is an Electric type Pokemon with 35 HP, 55 Attack, 40 Defense, 50 Special, and 90 Speed."
+- For move information: "Swords Dance is a Normal type status move with 0 power, 30 PP, and 100% accuracy. It increases the user's Attack stat by two stages."
+- For evolution info: "Charmander evolves into Charmeleon at level 16, and then into Charizard at level 36."
+
+Here is the Pokemon data you have access to:\n\n${csvContext}\n\n`;
 
             if (sessionContext) {
                 prompt += `Previous conversation:\n${sessionContext}\n\n`;
@@ -120,31 +156,119 @@ class LlamaIndexService {
     }
 
     /**
+     * Correct misheard Pokémon names using a small LLM call
+     * @param {string} text - Original transcribed text
+     * @returns {Promise<string>} Corrected text
+     */
+    async correctPokemonNames(text) {
+        try {
+            const correctionResponse = await this.llm.complete({
+                prompt: `You are a Pokémon name correction assistant. Your job is to identify and correct misheard Pokémon names in transcribed speech.
+
+Common speech-to-text errors for Pokémon names:
+- "mu" → "mew"
+- "mew two" → "mewtwo" 
+- "pick a chew" → "pikachu"
+- "char man der" → "charmander"
+- "squirt el" → "squirtle"
+- "bulb a saur" → "bulbasaur"
+- "pidge y" → "pidgey"
+- "rat tat ta" → "rattata"
+- And many other similar phonetic mishearings
+
+Rules:
+1. Only correct Pokémon names, leave all other words unchanged
+2. Only correct if you're confident it's a Pokémon name
+3. Return the corrected text with the same structure and capitalization
+4. If no Pokémon names need correction, return the original text unchanged
+
+Examples:
+Input: "can mu learn tm01"
+Output: "can mew learn tm01"
+
+Input: "what are pick a chew stats"
+Output: "what are pikachu stats"
+
+Input: "how do I evolve char man der"
+Output: "how do I evolve charmander"
+
+Please correct any misheard Pokémon names in this transcribed text: "${text}"`,
+                maxTokens: 100,
+                temperature: 0.1
+            });
+
+            const correctedText = correctionResponse.text?.trim();
+            if (correctedText && correctedText !== text) {
+                console.log(`Pokémon name correction: "${text}" → "${correctedText}"`);
+                return correctedText;
+            }
+            return text;
+        } catch (error) {
+            console.error('Error correcting Pokémon names:', error);
+            return text; // Return original text if correction fails
+        }
+    }
+
+    /**
+     * Enhanced query method with Pokémon name correction
+     * @param {string} query - User query (transcribed voice)
+     * @param {string} sessionContext - Conversation context
+     * @returns {Promise<string>} Response from the AI
+     */
+    async queryWithCorrection(query, sessionContext = '') {
+        try {
+            // First, correct any misheard Pokémon names
+            const correctedQuery = await this.correctPokemonNames(query);
+
+            // Then process the corrected query normally
+            return await this.query(correctedQuery, sessionContext);
+        } catch (error) {
+            console.error('Error in queryWithCorrection:', error);
+            throw new Error(`Failed to process query: ${error.message}`);
+        }
+    }
+
+    /**
      * Format CSV data for better indexing
      * @param {string} csvData - Raw CSV data
      * @returns {string} Formatted data for indexing
      */
     formatCSVForIndexing(csvData) {
         try {
-            const lines = csvData.trim().split('\n');
-            if (lines.length === 0) return '';
+            // Split the data by file sections
+            const sections = csvData.split('===');
+            let formattedData = '';
 
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-            const dataLines = lines.slice(1);
+            for (const section of sections) {
+                if (!section.trim()) continue;
 
-            let formattedData = `CSV Data with ${headers.length} columns:\n`;
-            formattedData += `Headers: ${headers.join(', ')}\n\n`;
+                const lines = section.trim().split('\n');
+                if (lines.length === 0) continue;
 
-            // Add first few rows as examples
-            const exampleRows = dataLines.slice(0, 5);
-            formattedData += 'Sample data:\n';
-            exampleRows.forEach((line, index) => {
-                const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-                formattedData += `Row ${index + 1}: ${values.join(' | ')}\n`;
-            });
+                // First line contains the file name
+                const fileName = lines[0].trim();
+                const dataLines = lines.slice(1);
 
-            if (dataLines.length > 5) {
-                formattedData += `\n... and ${dataLines.length - 5} more rows\n`;
+                if (dataLines.length === 0) continue;
+
+                const headers = dataLines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                const actualData = dataLines.slice(1);
+
+                formattedData += `\n${fileName}:\n`;
+                formattedData += `Columns: ${headers.join(', ')}\n\n`;
+
+                // Add first few rows as examples
+                const exampleRows = actualData.slice(0, 3);
+                formattedData += 'Sample data:\n';
+                exampleRows.forEach((line, index) => {
+                    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                    formattedData += `Row ${index + 1}: ${values.join(' | ')}\n`;
+                });
+
+                if (actualData.length > 3) {
+                    formattedData += `... and ${actualData.length - 3} more rows\n`;
+                }
+                formattedData += '\n';
             }
 
             return formattedData;
@@ -177,7 +301,7 @@ class LlamaIndexService {
             csvLoaded: !!this.csvData,
             csvSize: this.csvData ? this.csvData.length : 0,
             llmInitialized: !!this.llm,
-            model: this.llm ? process.env.OPENAI_MODEL || 'gpt-3.5-turbo' : 'none'
+            model: 'gpt-3.5-turbo'
         };
     }
 }

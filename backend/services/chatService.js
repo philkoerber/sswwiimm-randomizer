@@ -1,35 +1,38 @@
-const { LlamaIndexService } = require('./llamaIndexService');
+const { QueryProcessor } = require('./processors/QueryProcessor');
+const { PokemonNameCorrector } = require('./processors/PokemonNameCorrector');
+const { SessionManager } = require('./session/SessionManager');
 
 class ChatService {
     constructor() {
-        this.llamaIndexService = new LlamaIndexService();
-        this.sessions = new Map();
+        this.queryProcessor = new QueryProcessor();
+        this.pokemonNameCorrector = new PokemonNameCorrector();
+        this.sessionManager = new SessionManager();
     }
 
     /**
-     * Process a voice-to-text query using LlamaIndex
+     * Process a voice-to-text query with Pokémon name correction
      * @param {string} message - The transcribed voice message
      * @param {string} sessionId - Session ID for conversation history
      * @returns {Promise<Object>} The chatbot response
      */
     async processQuery(message, sessionId = null) {
         try {
-            // Get session context if sessionId is provided
+            // Step 1: Correct any misheard Pokémon names
+            const correctedMessage = await this.pokemonNameCorrector.correctPokemonNames(message);
+
+            // Step 2: Get session context if sessionId is provided
             let sessionContext = '';
-            if (sessionId && this.sessions.has(sessionId)) {
-                const session = this.sessions.get(sessionId);
-                sessionContext = this.buildSessionContext(session.messages);
-                session.messages.push({ role: 'user', content: message });
+            if (sessionId) {
+                sessionContext = this.sessionManager.getSessionContext(sessionId);
+                this.sessionManager.addMessage(sessionId, 'user', correctedMessage);
             }
 
-            // Process query with LlamaIndex (uses pre-loaded CSV data)
-            const response = await this.llamaIndexService.query(message, sessionContext);
+            // Step 3: Process the corrected query
+            const response = await this.queryProcessor.processQuery(correctedMessage, sessionContext);
 
-            // Update session if exists
-            if (sessionId && this.sessions.has(sessionId)) {
-                const session = this.sessions.get(sessionId);
-                session.messages.push({ role: 'assistant', content: response });
-                session.lastActivity = new Date();
+            // Step 4: Update session if exists
+            if (sessionId) {
+                this.sessionManager.addMessage(sessionId, 'assistant', response);
             }
 
             return {
@@ -49,21 +52,7 @@ class ChatService {
      */
     async createSession() {
         try {
-            const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            const session = {
-                sessionId,
-                messages: [],
-                createdAt: new Date(),
-                lastActivity: new Date()
-            };
-
-            this.sessions.set(sessionId, session);
-
-            return {
-                sessionId,
-                message: 'Session created successfully'
-            };
+            return await this.sessionManager.createSession();
         } catch (error) {
             console.error('Error creating session:', error);
             throw new Error(`Failed to create session: ${error.message}`);
@@ -76,21 +65,7 @@ class ChatService {
      * @returns {Object|null} Session information
      */
     getSession(sessionId) {
-        return this.sessions.get(sessionId) || null;
-    }
-
-    /**
-     * Build context from session messages
-     * @param {Array} messages - Session messages
-     * @returns {string} Formatted context
-     */
-    buildSessionContext(messages) {
-        if (messages.length === 0) return '';
-
-        const recentMessages = messages.slice(-6); // Last 6 messages for context
-        return recentMessages
-            .map(msg => `${msg.role}: ${msg.content}`)
-            .join('\n');
+        return this.sessionManager.getSession(sessionId);
     }
 
     /**
@@ -98,13 +73,19 @@ class ChatService {
      * @param {number} maxAge - Maximum age in hours
      */
     cleanupSessions(maxAge = 24) {
-        const cutoff = new Date(Date.now() - maxAge * 60 * 60 * 1000);
+        return this.sessionManager.cleanupSessions(maxAge);
+    }
 
-        for (const [sessionId, session] of this.sessions.entries()) {
-            if (session.lastActivity < cutoff) {
-                this.sessions.delete(sessionId);
-            }
-        }
+    /**
+     * Get comprehensive service statistics
+     * @returns {Object} Statistics from all services
+     */
+    getStats() {
+        return {
+            queryProcessor: this.queryProcessor.getStats(),
+            pokemonNameCorrector: this.pokemonNameCorrector.getStats(),
+            sessionManager: this.sessionManager.getStats()
+        };
     }
 }
 

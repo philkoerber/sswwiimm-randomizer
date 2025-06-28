@@ -258,6 +258,69 @@ export default function TestPage() {
                             </Button>
                         </div>
 
+                        {/* Example Pokemon Questions */}
+                        <div className="space-y-2">
+                            <Label>Example Pokemon Questions:</Label>
+                            <div className="flex flex-wrap gap-2">
+                                <Button
+                                    onClick={() => setMessage("What stats does Gengar have?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    Gengar Stats
+                                </Button>
+                                <Button
+                                    onClick={() => setMessage("What's the effect of Swords Dance?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    Swords Dance
+                                </Button>
+                                <Button
+                                    onClick={() => setMessage("What is TM27?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    TM27
+                                </Button>
+                                <Button
+                                    onClick={() => setMessage("What are the best moves for Charizard?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    Charizard Moves
+                                </Button>
+                                <Button
+                                    onClick={() => setMessage("How do I evolve Haunter?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    Haunter Evolution
+                                </Button>
+                                <Button
+                                    onClick={() => setMessage("What type is Psychic weak against?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    Psychic Weaknesses
+                                </Button>
+                                <Button
+                                    onClick={() => setMessage("Where can I find Mewtwo?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    Mewtwo Location
+                                </Button>
+                                <Button
+                                    onClick={() => setMessage("What does the Master Ball do?")}
+                                    variant="secondary"
+                                    size="sm"
+                                >
+                                    Master Ball
+                                </Button>
+                            </div>
+                        </div>
+
                         {chatResponse && (
                             <div className="mt-4">
                                 <Label>Response:</Label>

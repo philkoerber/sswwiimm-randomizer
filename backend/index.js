@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3001;
 // Import routes
 const chatRoutes = require('./routes/chat');
 const healthRoutes = require('./routes/health');
+const voiceChatRoutes = require('./routes/voiceChat');
 
 // Security middleware
 app.use(helmet());
@@ -35,6 +36,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/chat', chatRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/voice-chat', voiceChatRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
