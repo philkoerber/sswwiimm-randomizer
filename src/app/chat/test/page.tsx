@@ -1,19 +1,46 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
+// Type definitions
+interface ErrorResponse {
+    error: string;
+}
+
+interface HealthResponse {
+    status: string;
+    timestamp: string;
+    environment?: string;
+    [key: string]: unknown;
+}
+
+interface SessionResponse {
+    success: boolean;
+    sessionId?: string;
+    message?: string;
+    [key: string]: unknown;
+}
+
+interface EnvInfo {
+    nodeEnv?: string;
+    backendUrl?: string;
+    error?: string;
+}
+
+type LoadingState = '' | 'health' | 'ready' | 'live' | 'session' | 'getSession' | 'message' | 'root';
+
 export default function TestPage() {
-    const [healthStatus, setHealthStatus] = useState<any>(null);
-    const [chatResponse, setChatResponse] = useState<any>(null);
+    const [healthStatus, setHealthStatus] = useState<HealthResponse | ErrorResponse | null>(null);
+    const [chatResponse, setChatResponse] = useState<SessionResponse | ErrorResponse | null>(null);
     const [sessionId, setSessionId] = useState<string>('');
     const [message, setMessage] = useState<string>('');
-    const [loading, setLoading] = useState<string>('');
-    const [envInfo, setEnvInfo] = useState<any>({});
+    const [loading, setLoading] = useState<LoadingState>('');
+    const [envInfo, setEnvInfo] = useState<EnvInfo>({});
 
     // Load environment info on component mount
     useEffect(() => {
@@ -26,7 +53,7 @@ export default function TestPage() {
             const data = await response.json();
             setEnvInfo(data);
         } catch (error) {
-            setEnvInfo({ error: (error as any).message });
+            setEnvInfo({ error: (error as Error).message });
         }
     };
 
@@ -37,7 +64,7 @@ export default function TestPage() {
             const data = await response.json();
             setHealthStatus(data);
         } catch (error) {
-            setHealthStatus({ error: (error as any).message });
+            setHealthStatus({ error: (error as Error).message });
         } finally {
             setLoading('');
         }
@@ -50,7 +77,7 @@ export default function TestPage() {
             const data = await response.json();
             setHealthStatus(data);
         } catch (error) {
-            setHealthStatus({ error: (error as any).message });
+            setHealthStatus({ error: (error as Error).message });
         } finally {
             setLoading('');
         }
@@ -63,7 +90,7 @@ export default function TestPage() {
             const data = await response.json();
             setHealthStatus(data);
         } catch (error) {
-            setHealthStatus({ error: (error as any).message });
+            setHealthStatus({ error: (error as Error).message });
         } finally {
             setLoading('');
         }
@@ -83,7 +110,7 @@ export default function TestPage() {
                 setChatResponse(data);
             }
         } catch (error) {
-            setChatResponse({ error: (error as any).message });
+            setChatResponse({ error: (error as Error).message });
         } finally {
             setLoading('');
         }
@@ -100,7 +127,7 @@ export default function TestPage() {
             const data = await response.json();
             setChatResponse(data);
         } catch (error) {
-            setChatResponse({ error: (error as any).message });
+            setChatResponse({ error: (error as Error).message });
         } finally {
             setLoading('');
         }
@@ -127,7 +154,7 @@ export default function TestPage() {
             setChatResponse(data);
             setMessage('');
         } catch (error) {
-            setChatResponse({ error: (error as any).message });
+            setChatResponse({ error: (error as Error).message });
         } finally {
             setLoading('');
         }
@@ -140,10 +167,14 @@ export default function TestPage() {
             const data = await response.json();
             setHealthStatus(data);
         } catch (error) {
-            setHealthStatus({ error: (error as any).message });
+            setHealthStatus({ error: (error as Error).message });
         } finally {
             setLoading('');
         }
+    };
+
+    const handleMessageChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+        setMessage(e.target.value);
     };
 
     return (
@@ -245,7 +276,7 @@ export default function TestPage() {
                             <Textarea
                                 id="message"
                                 value={message}
-                                onChange={(e: any) => setMessage(e.target.value)}
+                                onChange={handleMessageChange}
                                 placeholder="Enter a test message..."
                                 className="min-h-[80px]"
                             />

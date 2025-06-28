@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,18 @@ export default function HotkeyConfigForm() {
     const [listeningFor, setListeningFor] = useState<'keyboard' | 'controller' | null>(null);
     const [flashButtonStates, setFlashButtonStates] = useState<{ [controllerId: string]: boolean }>({});
     const setVoiceChatHotkeySet = useAppStore((s) => s.setVoiceChatHotkeySet);
+
+    const handleConfigChange = useCallback((updates: Partial<HotkeyConfig>) => {
+        const newConfig = { ...hotkeyConfig, ...updates };
+        setHotkeyConfig(newConfig);
+        controllerManager.setHotkeyConfig(newConfig);
+        // Update store state for hotkey presence
+        const hotkeySet = (
+            (newConfig.keyboardKey && newConfig.keyboardKey.trim() !== "") ||
+            (newConfig.controllerId && newConfig.buttonIndex !== undefined)
+        );
+        setVoiceChatHotkeySet(!!hotkeySet);
+    }, [hotkeyConfig, setVoiceChatHotkeySet]);
 
     useEffect(() => {
         // Get initial state
@@ -67,18 +79,6 @@ export default function HotkeyConfigForm() {
             unsubscribeControllers();
         };
     }, []);
-
-    const handleConfigChange = (updates: Partial<HotkeyConfig>) => {
-        const newConfig = { ...hotkeyConfig, ...updates };
-        setHotkeyConfig(newConfig);
-        controllerManager.setHotkeyConfig(newConfig);
-        // Update store state for hotkey presence
-        const hotkeySet = (
-            (newConfig.keyboardKey && newConfig.keyboardKey.trim() !== "") ||
-            (newConfig.controllerId && newConfig.buttonIndex !== undefined)
-        );
-        setVoiceChatHotkeySet(!!hotkeySet);
-    };
 
     const startListeningForKeyboard = () => {
         setIsListening(true);
@@ -123,7 +123,7 @@ export default function HotkeyConfigForm() {
         };
         checkControllerInput();
         return () => { stopped = true; };
-    }, [isListening, listeningFor, controllers]);
+    }, [isListening, listeningFor, controllers, handleConfigChange]);
 
     const clearControllerHotkey = () => {
         handleConfigChange({ controllerId: undefined, buttonIndex: undefined });

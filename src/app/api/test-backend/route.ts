@@ -1,49 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Type definitions
+interface ApiResponse {
+    [key: string]: unknown;
+}
+
+interface ErrorResponse {
+    error: string;
+}
+
+interface HealthResponse {
+    status: string;
+    timestamp: string;
+    environment?: string;
+    [key: string]: unknown;
+}
+
+interface SessionResponse {
+    success: boolean;
+    sessionId?: string;
+    message?: string;
+    [key: string]: unknown;
+}
+
+interface EnvInfo {
+    nodeEnv: string;
+    backendUrl?: string;
+}
+
 // Backend URL configuration
-const getBackendUrl = () => {
+const getBackendUrl = (): string | undefined => {
     return process.env.BACKEND_URL;
 };
 
 // Health check endpoints
-const testHealth = async (backendUrl: string) => {
+const testHealth = async (backendUrl: string): Promise<HealthResponse | ErrorResponse> => {
     try {
         const response = await fetch(`${backendUrl}/api/health`);
         return await response.json();
     } catch (error) {
-        return { error: (error as any).message };
+        return { error: (error as Error).message };
     }
 };
 
-const testHealthReady = async (backendUrl: string) => {
+const testHealthReady = async (backendUrl: string): Promise<HealthResponse | ErrorResponse> => {
     try {
         const response = await fetch(`${backendUrl}/api/health/ready`);
         return await response.json();
     } catch (error) {
-        return { error: (error as any).message };
+        return { error: (error as Error).message };
     }
 };
 
-const testHealthLive = async (backendUrl: string) => {
+const testHealthLive = async (backendUrl: string): Promise<HealthResponse | ErrorResponse> => {
     try {
         const response = await fetch(`${backendUrl}/api/health/live`);
         return await response.json();
     } catch (error) {
-        return { error: (error as any).message };
+        return { error: (error as Error).message };
     }
 };
 
-const testRootEndpoint = async (backendUrl: string) => {
+const testRootEndpoint = async (backendUrl: string): Promise<ApiResponse | ErrorResponse> => {
     try {
         const response = await fetch(`${backendUrl}/`);
         return await response.json();
     } catch (error) {
-        return { error: (error as any).message };
+        return { error: (error as Error).message };
     }
 };
 
 // Chat session endpoints
-const createSession = async (backendUrl: string) => {
+const createSession = async (backendUrl: string): Promise<SessionResponse | ErrorResponse> => {
     try {
         const response = await fetch(`${backendUrl}/api/chat/session`, {
             method: 'POST',
@@ -53,20 +81,20 @@ const createSession = async (backendUrl: string) => {
         });
         return await response.json();
     } catch (error) {
-        return { error: (error as any).message };
+        return { error: (error as Error).message };
     }
 };
 
-const getSession = async (backendUrl: string, sessionId: string) => {
+const getSession = async (backendUrl: string, sessionId: string): Promise<ApiResponse | ErrorResponse> => {
     try {
         const response = await fetch(`${backendUrl}/api/chat/session/${sessionId}`);
         return await response.json();
     } catch (error) {
-        return { error: (error as any).message };
+        return { error: (error as Error).message };
     }
 };
 
-const sendMessage = async (backendUrl: string, message: string, sessionId?: string) => {
+const sendMessage = async (backendUrl: string, message: string, sessionId?: string): Promise<ApiResponse | ErrorResponse> => {
     try {
         const response = await fetch(`${backendUrl}/api/chat/query`, {
             method: 'POST',
@@ -80,12 +108,12 @@ const sendMessage = async (backendUrl: string, message: string, sessionId?: stri
         });
         return await response.json();
     } catch (error) {
-        return { error: (error as any).message };
+        return { error: (error as Error).message };
     }
 };
 
 // Get environment information
-const getEnvInfo = () => {
+const getEnvInfo = (): EnvInfo => {
     return {
         nodeEnv: process.env.NODE_ENV || 'development',
         backendUrl: getBackendUrl(),
